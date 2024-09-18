@@ -51,6 +51,7 @@ classdef hw01
             %    15 | 7.177078E-07 | 2.673808E-10
 
             % Explanation of the results (why there is a difference between the two choices):
+            %
             % The second formula does not involve subtraction, therefore
             % is more accurate when adding small contributions.
             %
@@ -89,41 +90,137 @@ classdef hw01
             end
         end
 
-        function p4(a)
-            % This function test the performance of Kahan summation algorithm against native sum.
-            % :param a: a vector of numbers in double precision.
-            % :return: no returns
-
-            % Test this function with a = rand(n, 1) with various size n multiple times. 
-            % Summarize your findings below.
-            %
-            % Findings:
-            % 
-            % Matlab's sum uses naive implementation and suffers from
-            % roundoff/occumulation error, while Kahan compensated
-            % summation does not. 
-            %
-            %
-            
-            single_a = single(a); % Convert a to single precision
-            s = hw01.p3(a); % Kahan sum of a under double precision (regarded as truth).
-
-            single_Kahan_s = hw01.p3(single_a); % Kahan sum of single_a under single precision.
-            single_naive_s = sum(single_a); % Naive sum of single_a under single precision.
-   
-            disp(['Error of naive sum under single precision: ', num2str(single_naive_s-s)]);
-            disp(['Error of Kahan sum under single precision: ', num2str(single_Kahan_s-s)]);
+        function p4(test_range)
+            disp("Error under single precision.")
+            opt = {"Naive", "Kahan"};
+            tmp = fprintf("%4s | %12s | %12s | %12s\n", "n", opt{:}, "Best Method");
+            for i = 1:tmp
+                fprintf("-");
+            end
+            fprintf("\n");
+            res_count = zeros(1,length(opt));
+            for i = test_range
+                a = i{1};
+                % This function test the performance of Kahan summation algorithm against native sum.
+                % :param a: a vector of numbers in double precision.
+                % :return: no returns
+    
+                % Test this function with a = rand(n, 1) with various size n multiple times. 
+                % Summarize your findings below.
+                %
+                % Findings:
+                % 
+                % Matlab's sum uses naive implementation and suffers from
+                % roundoff/occumulation error, while Kahan compensated
+                % summation does not. 
+                %
+                % Correction: I actually made a mistake and used initial
+                % inputs as all single. When switching back to double for
+                % baseline, the Naive sum of matlab endded up being better 
+                % at very few instances (idk why) or matching Kahan. Although,
+                % Kahan sum is still performing far more better (overall)
+                %
+                
+                single_a = single(a); % Convert a to single precision
+                s = hw01.p3(a); % Kahan sum of a under double precision (regarded as truth).
+    
+                single_Kahan_s = hw01.p3(single_a); % Kahan sum of single_a under single precision.
+                single_naive_s = sum(single_a); % Naive sum of single_a under single precision.
+       
+                % disp(['Error of naive sum under single precision: ', num2str(single_naive_s-s)]);
+                % disp(['Error of Kahan sum under single precision: ', num2str(single_Kahan_s-s)]);
+                
+                res = {abs(single_naive_s-s), abs(single_Kahan_s-s)};
+                val = [res{:}] == min([res{:}]);
+                res_str = "";
+                tmp_multires = false;
+                for ii = 1:length(res_count)
+                    if val(ii)
+                        res_count(ii) = res_count(ii) + 1;
+                        if tmp_multires
+                            res_str = sprintf("%s+%s", res_str, opt{ii});
+                        else
+                            res_str = sprintf("%s", opt{ii});
+                        end
+                        tmp_multires = true;
+                    end
+                end
+                fprintf("%4i | %12E | %12E | %12s \n",length(a), res{:}, res_str);
+            end
+            for i = 1:tmp
+                fprintf("-");
+            end
+            fprintf("\n");
+            [~, ind] = sort(res_count,'descend');
+            fprintf("Ranking: ");
+            for i = 1:length(opt)
+                fprintf("%s: %i ",opt{ind(i)}, res_count(ind(i)))
+            end
+            fprintf("\n")
+            [~, ind] = max(res_count);
+            fprintf("Best Method Overall: %s\n", opt{ind});
+            for i = 1:tmp
+                fprintf("-");
+            end
+            fprintf("\n");
         end
 
-        function s = p5_1(a)
-            i = 1;
-            k = length(a);
-
-            s = get_sum(i,floor((i+k)/2), a) + get_sum(floor((i+k)/2) + 1, k, a); %this is kinda dumb...
-
-            function T = get_sum(i_start,i_end, a)
-                T = sum(a(i_start:1:i_end));
+        function p5_test(test_range)
+            disp("Error under single precision.")
+            opt = {"Naive", "Kahan", "Method II"};
+            tmp = fprintf("%4s | %12s | %12s | %12s | %30s\n", "n", opt{:}, "Best Method");
+            for i = 1:tmp
+                fprintf("-");
             end
+            fprintf("\n");
+            res_count = zeros(1,length(opt));
+            
+            for i = test_range
+                a = i{1};
+                single_a = single(a); % Convert a to single precision
+                s = hw01.p3(a); % Kahan sum of a under double precision (regarded as truth).
+                
+                single_naive_s = sum(single_a); % Naive sum of single_a under single precision.
+                single_Kahan_s = hw01.p3(single_a); % Kahan sum of single_a under single precision.
+                single_method_2_s = hw01.p5(single_a); % Naive sum of single_a under single precision.
+            
+                % fprintf("%4i | %12E | %12E | %12E\n",length(a), abs(single_naive_s-s), abs(single_Kahan_s-s), abs(single_method_2_s-s));
+
+
+                res = {abs(single_naive_s-s), abs(single_Kahan_s-s), abs(single_method_2_s-s)};
+                val = [res{:}] == min([res{:}]);
+                res_str = "";
+                tmp_multires = false;
+                for ii = 1:length(res_count)
+                    if val(ii)
+                        res_count(ii) = res_count(ii) + 1;
+                        if tmp_multires
+                            res_str = sprintf("%s+%s", res_str, opt{ii});
+                        else
+                            res_str = sprintf("%s", opt{ii});
+                        end
+                        tmp_multires = true;
+                    end
+                end
+                fprintf("%4i | %12E | %12E | %12s | %30s\n",length(a), res{:}, res_str);
+            end
+
+            for i = 1:tmp
+                fprintf("-");
+            end
+            fprintf("\n");
+            [~, ind] = sort(res_count,'descend');
+            fprintf("Ranking: ");
+            for i = 1:length(opt)
+                fprintf("%s: %i        ",opt{ind(i)}, res_count(ind(i)))
+            end
+            fprintf("\n")
+            [~, ind] = max(res_count);            
+            fprintf("Best Method Overall: %s\n", opt{ind});
+            for i = 1:tmp
+                fprintf("-");
+            end
+            fprintf("\n");
         end
 
         function s = p5(a)
@@ -139,23 +236,43 @@ classdef hw01
             %
             % Findings: 
             %
-            %
-            %
-            %
-            %
+            % Kahan's methods is still better. In fact this method
+            % is even worse than naive sum (not sure why).
+            % The implementation is still somewhat cryptic to me
+            % so it might be wrong, thus leading to this result.
+            % I was expecting this method to be in between naive 
+            % sum and Kahan's sum.
+            % 
+            % Correction:
+            % The second implementation corrected this.
+            % Now, the Method II is at worst the same as the 
+            % naive sum, but often better. Kahan's sum is still 
+            % outperforming it though. You can run the hw_test
+            % script to see that Method II scores about half-way
+            % between Naive and Kahan's sum.
+            % There are some instances where Kahan's and Naive sum
+            % are both better, so I guess there is no clear cut that 100%
+            % guranties one of the methods to be always better than others
 
 
-            single_a = single(a); % Convert a to single precision
-            s = hw01.p3(a); % Kahan sum of a under double precision (regarded as truth).
+            % this is wrong!
+            % n = length(a);             
+            % if n > 2
+            %     s = (a(1) + a(2)) + hw01.p5(a(3:n));
+            % elseif n == 1
+            %     s = a(1);
+            % else % is 2
+            %     s = (a(1) + a(2));
+            % end
             
-            single_naive_s = sum(single_a); % Naive sum of single_a under single precision.
-            single_Kahan_s = hw01.p3(single_a); % Kahan sum of single_a under single precision.
-            single_method_2_s = hw01.p5_1(single_a); % Naive sum of single_a under single precision.
-   
-            disp("Error under single precision.")
-            fprintf("%13s | %13s | %13s\n", "Naive", "Kahan", "Method 2");
-            fprintf("%+12E | %+12E | %+12E\n", single_naive_s-s, single_Kahan_s-s, single_method_2_s-s);
-
+            % this is better
+            i = 1;
+            k = length(a);
+            if k == 1
+                s = a(1);
+            else
+                s = sum(hw01.p5(a(i:floor((i+k)/2))) + hw01.p5(a(floor((i+k)/2) + 1:k)));
+            end
         end
     end
 end

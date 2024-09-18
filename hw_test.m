@@ -18,20 +18,16 @@ hw_assert(hw01_worker.p3([1, 2, 3]) == 6);
 hw_assert(hw01_worker.p3([eps, -eps]) == 0);
 
 test_range = cell(1,30);
-for i = 1:30
-    a = single(rand(randi(100), 1));
-    test_range{i} = a;
-    hw01_worker.p4(a);
+for i = 1:100
+    test_range{i} = (rand(randi(100), 1));
 end
+hw01_worker.p4(test_range);
 
 %%
-hw_assert(hw01_worker.p5_1([1, 2, 3]) == 6);
-hw_assert(hw01_worker.p5_1([eps, -eps]) == 0);
+hw_assert(hw01_worker.p5([1, 2, 3]) == 6);
+hw_assert(hw01_worker.p5([eps, -eps]) == 0);
 
-for i = test_range
-    a = i{1};
-    hw01_worker.p5(a);
-end
+hw01_worker.p5_test(test_range);
 
 function hw_assert(X)
     if X; fprintf('\t PASS\n'); else; fprintf('\t FAIL\n'); end
